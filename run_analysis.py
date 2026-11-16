@@ -109,7 +109,6 @@ def sensitivity_analyses(e, index, main, p7, p0, cr, good):
         variants[label] = d
     all_pairs = e[~e.renal_excluded].merge(p7, on=[ID, PID], validate='one_to_one')
     variants['First qualifying admission'] = first_admission(all_pairs)
-    variants['Admissions through July 2026'] = main[main.admission_date.le('2026-07-31')].copy()
     distribution, changes, medians = [], [], []
     for label, d in variants.items():
         distribution.extend(phenotype_rows(d, label))
@@ -233,11 +232,6 @@ def run():
         'eGFR, estimated glomerular filtration rate; UACR, urine albumin-to-creatinine ratio')
     add('table_s7','Table S7. Sample changes and reclassification in sensitivity analyses',changes.drop(columns=['Patients','Different admission']),
         'Changed category is assessed only among patients common to the primary and alternative analysis. Added/removed patients are relative to the primary analysis. Pairs over seven days occur only in the alternative first/last-creatinine checks. Changes in sample composition are separate from reclassification.', '')
-    cutoff=index[index.admission_date.le('2026-07-31')]
-    rows=[]
-    for label,d in [('Full period',index),('Through 31 July 2026',cutoff)]:
-        rows.append({'Period':label,'Patients':len(d),'Both markers':proportion(int(d.both.sum()),len(d)),'95% CI, %':interval(int(d.both.sum()),len(d)),'Same-day pair':proportion(int(d.pair0.sum()),len(d))})
-    pd.DataFrame(rows).to_csv(OUT/'observation_window.csv',index=False)
     (OUT/'tables.json').write_text(json.dumps(tables,ensure_ascii=False,indent=2))
     summary={'data':'SYNTHETIC ONLY','admissions':len(e),'patients':len(index),'both':int(index.both.sum()),'both_ci':wilson(int(index.both.sum()),len(index)),
              'paired_before_exclusions':int(index.pair7.sum()),'paired_exclusions':len(excluded),'main_pairs':len(main),'categories':main.category.value_counts().to_dict(),

@@ -56,10 +56,10 @@ discharge recommendations in both clinics from 1 January 2023 onward. Proportion
 intervals; medication estimates use 10,000 patient-clustered bootstrap resamples.
 
 Sensitivity analyses vary pairing time, creatinine selection, age bounds,
-reported eGFR, qualifying admission and the observation window. The laboratory's
+reported eGFR and qualifying admission. The laboratory's
 reported eGFR equation and indexing convention remain unspecified. There are no
 regression models, hypothesis tests or imputations.
 
 Code and artificial examples use the MIT License.
 
-Generated tables follow the final package: Tables 1–2 and S1–S7. Table S5 contains medication recommendations; Table S8 is the manually maintained RECORD checklist. Observation-window estimates are retained in `observation_window.csv`.
+Generated tables follow the final package: Tables 1–2 and S1–S7. Table S5 contains medication recommendations; Table S8 is the manually maintained RECORD checklist.
