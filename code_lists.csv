@@ -1,0 +1,16 @@
+domain,code_or_field,rule
+source cohort,E11,Admission diagnosis search followed by upstream diabetes-type review; not recreated by these scripts.
+source cohort,E10; LADA; secondary diabetes,Exclude documented non-T2D and unresolved type conflicts upstream; E10 code text alone does not override explicit adjudicated T2D. Insulin use alone does not establish diabetes type.
+eligibility,pregnancy,Present and not historical excludes the admission.
+renal status,renal_replacement_therapy,Present with current_maintenance excludes paired categories only.
+renal status,kidney_transplant_history,Present excludes paired categories only; includes failed grafts.
+renal status,historical; acute,Dialysis contexts retained in paired analysis unless another exclusion applies.
+renal status,unclear,Unresolved renal status stops analysis; status is not carried between admissions.
+laboratory,serum_creatinine_mg_dl,mg/dL; >0.
+laboratory,uacr_mg_g,mg/g; >=0; exact preferred reported value.
+laboratory,egfr_reported_ml_min,mL/min; >0; matched execution event; original equation and BSA convention unspecified.
+laboratory,hba1c_percent,%; >0; first usable result.
+laboratory,urine_albumin_mg_l; urine_creatinine_mg_dl,mg/L and mg/dL; component names recognized but not used to replace reported UACR.
+medications,SGLT2; ACEi/ARB; finerenone,Exact ingredient patterns and class rules are in medications() in derive.py.
+medications,discharge_exposure_eligible,Upstream adjudicated flag; raw text parsing is outside this repository.
+medications,stopped; temporarily_held; replaced; reference_only; conditional_replacement,Not active discharge exposure.

@@ -1,0 +1,59 @@
+table,variable,definition
+encounters,encounter_study_id,Admission linkage key; artificial SYNTHETIC identifier in examples.
+encounters,patient_study_id,Patient linkage and bootstrap cluster key; artificial SYNTHETIC identifier.
+encounters,admission_date,Admission calendar date; study window 2017-01-01 through 2026-09-03.
+encounters,discharge_date,Discharge calendar date; inpatient laboratory date upper bound.
+encounters,clinic,Endocrinology or Diabetology; contemporary medication cohort uses Diabetology.
+encounters,hospitalization_status,Only discharged admissions are eligible.
+encounters,sex,female or male; CKD-EPI coefficient.
+encounters,age_at_admission_min_years,Released minimum age in years; adult eligibility and sensitivity analysis.
+encounters,age_at_admission_calendar_years,Calendar-year age at admission used for main eGFR calculation.
+encounters,age_at_admission_max_years,Released maximum age in years; sensitivity analysis.
+encounters,calculated_bmi_kg_m2,BMI calculated from encounter height and weight; preferred when available.
+encounters,documented_bmi_kg_m2,Documented BMI fallback in kg/m2.
+encounters,discharge_medication_context,discharge_recommendation indicates an available discharge regimen.
+clinical_history,encounter_study_id,Admission linkage key; artificial SYNTHETIC identifier in examples.
+clinical_history,patient_study_id,Patient linkage and bootstrap cluster key; artificial SYNTHETIC identifier.
+clinical_history,history_record_id,Unique artificial history record key.
+clinical_history,concept,Structured clinical concept; see code_lists.csv.
+clinical_history,assertion,present qualifies; explicitly_absent does not; unclear renal status requires resolution.
+clinical_history,temporality,historical pregnancy alone does not exclude the admission.
+clinical_history,dialysis_context,current_maintenance excludes paired categories; historical and acute do not.
+labs,encounter_study_id,Admission linkage key; artificial SYNTHETIC identifier in examples.
+labs,patient_study_id,Patient linkage and bootstrap cluster key; artificial SYNTHETIC identifier.
+labs,lab_result_id,Unique result key; stable tie-breaker.
+labs,analyte,Standardized laboratory name; see code_lists.csv.
+labs,value,Numeric laboratory result in the specified unit; censored values are not exact.
+labs,unit,Expected standardized unit; see code_lists.csv.
+labs,collected_at,Specimen collection timestamp; preferred for selection.
+labs,executed_at,Execution timestamp; fallback timing and reported-eGFR matching key.
+labs,encounter_link_status,Only linked laboratory results are usable.
+labs,result_status,parsed or derived; UACR selection additionally requires reported origin.
+labs,comparison_operator,Only = or missing is treated as exact.
+labs,is_preferred_for_analysis,Select preferred UACR only; avoid duplicate reported and derived alternatives.
+labs,result_origin,reported for selected UACR; derived alternatives remain unselected.
+medications,encounter_study_id,Admission linkage key; artificial SYNTHETIC identifier in examples.
+medications,patient_study_id,Patient linkage and bootstrap cluster key; artificial SYNTHETIC identifier.
+medications,medication_record_id,Unique artificial medication mention key.
+medications,ingredient,Normalized ingredients including combination products; matching in derive.py.
+medications,medication_class,Normalized drug class; supplements ingredient matching.
+medications,medication_context,Only discharge_recommendation qualifies.
+medications,discharge_exposure_eligible,Upstream adjudication of eligibility as an active discharge recommendation.
+medications,medication_use_status,Active recommendation status; stopped/held/replaced/reference/conditional replacement excluded.
+derived,age,Calendar-year age used in main CKD-EPI 2021.
+derived,egfr,CKD-EPI 2021 creatinine estimate in mL/min/1.73 m2.
+derived,uacr,Selected reported UACR in mg/g.
+derived,both,Both usable markers during the index hospitalization regardless of interval.
+derived,pair7,A usable pair within seven calendar days during this admission.
+derived,pair0,A usable same-day pair.
+derived,renal_excluded,Current maintenance dialysis or kidney transplant history at this admission.
+derived,category,Four groups split at eGFR 60 and UACR 30; missing is not normal.
+derived,G,G1 >=90; G2 60–<90; G3a 45–<60; G3b 30–<45; G4 15–<30; G5 <15.
+derived,A,A1 <30; A2 30–<300; A3 >=300 mg/g.
+derived,bmi,Calculated BMI then documented BMI; no imputation.
+derived,hba1c,First usable exact inpatient HbA1c in percent.
+derived,sglt2,Active SGLT2 inhibitor discharge recommendation.
+derived,ace_arb,Active ACE inhibitor/ARB recommendation including sacubitril/valsartan.
+derived,finerenone,Active finerenone recommendation.
+derived,gap_days,Absolute calendar-day difference between paired results.
+derived,gap_hours,Absolute elapsed hours used after calendar-day gap for tie-breaking.
