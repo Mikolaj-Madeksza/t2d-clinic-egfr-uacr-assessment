@@ -63,9 +63,11 @@ def run():
             if 0 < bound < 1:
                 score=(r.n-r.N*bound)**2/(r.N*bound*(1-bound))
                 assert math.isclose(score,1.959963984540054**2,rel_tol=1e-9)
-    meds = e[e.clinic.eq('Diabetology') & e.admission_date.ge('2023-07-14') & e.regimen_available & ~e.renal_excluded].merge(p7,on=[ID,PID])
+    meds = e[e.clinic.isin(['Diabetology','Endocrinology']) & e.admission_date.ge('2023-01-01') & e.regimen_available & ~e.renal_excluded].merge(p7,on=[ID,PID])
     assert meds[ID].is_unique and not meds[ID].isin(renal).any()
-    assert meds.clinic.eq('Diabetology').all() and meds.admission_date.ge('2023-07-14').all()
+    assert meds.clinic.isin(['Diabetology','Endocrinology']).all() and meds.admission_date.between('2023-01-01','2026-09-03').all()
+    expected_meds = e[e.clinic.isin(['Diabetology','Endocrinology']) & e.admission_date.between('2023-01-01','2026-09-03') & e.regimen_available & ~e.renal_excluded]
+    assert set(meds[ID]) == set(expected_meds[ID]) & set(p7[ID])
     active = source['medications']
     active = active[active.discharge_exposure_eligible & active.medication_context.eq('discharge_recommendation')]
     for drug, ingredients in [('sglt2',['empagliflozin / metformin']),('ace_arb',['ramipril','sacubitril / valsartan']),('finerenone',['finerenone'])]:

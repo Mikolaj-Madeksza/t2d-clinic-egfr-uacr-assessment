@@ -145,7 +145,7 @@ def run():
     for clinic, g in index.groupby('clinic'):
         extra.append({'Characteristic': 'Both markers: '+clinic, 'All patients': proportion(int(g.both.sum()),len(g)), 'Both markers':'—','Without both':'—'})
     t1 = pd.concat([t1, pd.DataFrame(extra)], ignore_index=True)
-    add('table_1', 'Table 1. Kidney-marker availability and characteristics at the first eligible hospitalization', t1,
+    add('table_1', 'Table 1. Patient characteristics and kidney-marker availability at the index admission', t1,
         f'Values are n/N (%) or median [IQR], with the number of available observations. All eligible patients are included, including those receiving maintenance dialysis or with a kidney transplant. Both markers were available in {proportion(int(index.both.sum()), len(index))}; 95% CI {interval(int(index.both.sum()), len(index))}%. Clinical characteristics are not required for cohort inclusion. BMI uses released height/weight calculations where available, otherwise the documented value. HbA1c is the first usable inpatient result. Counts refer to patients.',
         'BMI, body mass index; CI, confidence interval; eGFR, estimated glomerular filtration rate; HbA1c, glycated hemoglobin; IQR, interquartile range; UACR, urine albumin-to-creatinine ratio')
 
@@ -163,7 +163,7 @@ def run():
         rows.append({'Category or measure':label,'Patients, n/N (%)':proportion(k,n),'95% CI, %':interval(k,n),'eGFR, median [IQR]':'—','UACR, median [IQR]':'—'})
         estimates.append({'measure':label,'n':k,'N':n,'percent':100*k/n,'ci_low':wilson(k,n)[0],'ci_high':wilson(k,n)[1]})
     pd.DataFrame(estimates).to_csv(OUT / 'complementarity_estimates.csv',index=False)
-    add('table_2', 'Table 2. Paired renal-marker categories at the first eligible hospitalization', pd.DataFrame(rows),
+    add('table_2', 'Table 2. Renal-marker categories among patients with paired measurements', pd.DataFrame(rows),
         'The earliest UACR with a creatinine result within seven calendar days was selected; the nearest creatinine was used. eGFR was calculated with CKD-EPI 2021. Units are mL/min/1.73 m² for eGFR and mg/g for UACR. G1–2 denotes eGFR ≥60; G3–5 denotes eGFR <60; A1 denotes UACR <30; A2–3 denotes UACR ≥30. Current maintenance dialysis and kidney transplantation were excluded. Confidence intervals use the Wilson method. These are single-admission marker categories, not confirmed CKD.',
         'CI, confidence interval; CKD, chronic kidney disease; CKD-EPI, Chronic Kidney Disease Epidemiology Collaboration; eGFR, estimated glomerular filtration rate; IQR, interquartile range; UACR, urine albumin-to-creatinine ratio')
 
@@ -188,7 +188,7 @@ def run():
     rows = []
     for (clinic, year),g in index.groupby(['clinic','year']):
         rows.append({'Clinic':clinic,'Year':str(year),'Patients':len(g),'eGFR available':proportion(int(g.creatinine_available.sum()),len(g)),'UACR available':proportion(int(g.uacr_available.sum()),len(g)),'Both markers':proportion(int(g.both.sum()),len(g))})
-    add('table_s2','Table S2. First-admission marker availability by clinic and year',pd.DataFrame(rows),
+    add('table_s2','Table S2. Kidney-marker availability by clinic and year',pd.DataFrame(rows),
         'Values are n/N (%). Each patient contributes only their first eligible admission in the entire cohort. Diabetology begins on 14 July 2023; 2026 includes admissions beginning through 3 September. Clinic comparisons also reflect different periods and patient populations.',
         'eGFR, estimated glomerular filtration rate; UACR, urine albumin-to-creatinine ratio')
 
@@ -202,19 +202,16 @@ def run():
         f'Values are n/N (%), with N={len(main)} for every cell. eGFR thresholds: G1 ≥90, G2 60–<90, G3a 45–<60, G3b 30–<45, G4 15–<30, G5 <15 mL/min/1.73 m². UACR thresholds: A1 <30, A2 30–<300, A3 ≥300 mg/g. Current maintenance dialysis and kidney transplantation are excluded. Single-admission categories do not establish CKD.',
         'CKD, chronic kidney disease; eGFR, estimated glomerular filtration rate; UACR, urine albumin-to-creatinine ratio')
 
-    unpaired=index[~index.pair7]; excluded=index[index.pair7&index.renal_excluded]
-    add('table_s4','Table S4. Selection into the paired renal-marker analysis',characteristics({'Included':main,'No qualifying pair':unpaired,'Paired but excluded':excluded}),
-        'Values are n/N (%) or median [IQR], with available n. The three groups partition the index-admission cohort. Paired exclusions are current maintenance dialysis or kidney transplantation.',
-        'BMI, body mass index; HbA1c, glycated hemoglobin; IQR, interquartile range')
+    excluded=index[index.pair7&index.renal_excluded]
 
     rows=[]
     for field,label in [('maintenance_dialysis','Current maintenance dialysis'),('transplant','Kidney transplant history'),('renal_excluded','Either exclusion'),('historical_dialysis','Historical dialysis'),('acute_dialysis','Acute dialysis'),('renal_status_unresolved','Unresolved status')]:
         g=index[index[field]]
         rows.append({'Documented status':label,'Index patients':len(g),'Both markers':int(g.both.sum()),'Pair within 7 days':int(g.pair7.sum())})
-    add('table_s5','Table S5. Renal replacement and transplant status at the index admission',pd.DataFrame(rows),
+    add('table_s4','Table S4. Dialysis and kidney transplant status at the index admission',pd.DataFrame(rows),
         'Counts refer to distinct patients. Rows can overlap. Status is based on affirmative, encounter-specific source assertions. Historical and acute dialysis do not by themselves establish current maintenance dialysis. Transplant history includes failed grafts.', '')
 
-    recent=e[e.clinic.eq('Diabetology')&e.admission_date.ge('2023-07-14')&e.regimen_available&~e.renal_excluded].merge(p7,on=[ID,PID],validate='one_to_one')
+    recent=e[e.clinic.isin(['Diabetology','Endocrinology'])&e.admission_date.ge('2023-01-01')&e.regimen_available&~e.renal_excluded].merge(p7,on=[ID,PID],validate='one_to_one')
     boot=cluster_intervals(recent);boot.to_csv(OUT/'medication_estimates.csv',index=False)
     rows=[]
     for cat in CATEGORIES:
@@ -223,26 +220,24 @@ def run():
             b=boot[boot.category.eq(cat)&boot.drug.eq(drug)].iloc[0]
             row[label]=proportion(int(b.n),int(b.N))+f'; CI {b.ci_low:.1f}–{b.ci_high:.1f}'
         row['Finerenone, n']=int(g.finerenone.sum());rows.append(row)
-    add('table_s6','Table S6. Contemporary discharge recommendations by renal-marker category',pd.DataFrame(rows),
-        f'Diabetology admissions beginning 14 July 2023–3 September 2026 with a qualifying pair and available discharge list; current maintenance dialysis and kidney transplantation excluded. Total: {len(recent)} admissions from {recent[PID].nunique()} patients. Values are n/N (%) with patient-clustered 95% bootstrap confidence intervals. Patients may appear in more than one category across admissions. ARB-containing sacubitril/valsartan is included ({int(recent.sacubitril_valsartan.sum())} admissions). Finerenone is a count. Recommendations do not establish post-discharge use or treatment appropriateness.',
+    add('table_s5','Table S5. Discharge medication recommendations by renal-marker category',pd.DataFrame(rows),
+        f'Endocrinology and Diabetology admissions from 1 January 2023 to 3 September 2026 with paired renal markers and an available discharge regimen; maintenance dialysis and kidney transplantation excluded. Total: {len(recent)} admissions from {recent[PID].nunique()} patients. Values are n/N (%) with patient-clustered 95% bootstrap confidence intervals; finerenone is a count. Patients may contribute to more than one category. ACEi/ARB includes sacubitril/valsartan ({int(recent.sacubitril_valsartan.sum())} admissions).',
         'ACEi, angiotensin-converting enzyme inhibitor; ARB, angiotensin receptor blocker; CI, confidence interval; SGLT2, sodium-glucose cotransporter 2')
 
     variants,dist,changes=sensitivity_analyses(e,index,main,p7,p0,cr,good)
     rows=[]
     for label,d in variants.items():
         rows.append({'Analysis':label,'N':len(d),**{cat:f'{int(d.category.eq(cat).sum())} ({100*d.category.eq(cat).mean():.1f}%)' for cat in CATEGORIES}})
-    add('table_s7','Table S7. Renal-marker categories in sensitivity analyses',pd.DataFrame(rows),
+    add('table_s6','Table S6. Renal-marker categories in sensitivity analyses',pd.DataFrame(rows),
         'Values are n (% within each analysis). The same renal exclusions apply throughout. First/last creatinine analyses keep the primary UACR and admission fixed. The first qualifying admission may be later than the index admission. Reported eGFR uses the common set with a matched reported result; its original equation is unspecified. Age bounds use the released minimum and maximum ages.',
         'eGFR, estimated glomerular filtration rate; UACR, urine albumin-to-creatinine ratio')
-    add('table_s8','Table S8. Sample changes and reclassification in sensitivity analyses',changes.drop(columns=['Patients','Different admission']),
+    add('table_s7','Table S7. Sample changes and reclassification in sensitivity analyses',changes.drop(columns=['Patients','Different admission']),
         'Changed category is assessed only among patients common to the primary and alternative analysis. Added/removed patients are relative to the primary analysis. Pairs over seven days occur only in the alternative first/last-creatinine checks. Changes in sample composition are separate from reclassification.', '')
     cutoff=index[index.admission_date.le('2026-07-31')]
     rows=[]
     for label,d in [('Full period',index),('Through 31 July 2026',cutoff)]:
         rows.append({'Period':label,'Patients':len(d),'Both markers':proportion(int(d.both.sum()),len(d)),'95% CI, %':interval(int(d.both.sum()),len(d)),'Same-day pair':proportion(int(d.pair0.sum()),len(d))})
-    add('table_s9','Table S9. Marker availability by observation window',pd.DataFrame(rows),
-        'The restricted period omits admissions beginning after the baseline search window. Numerical agreement does not establish extraction completeness.',
-        'CI, confidence interval')
+    pd.DataFrame(rows).to_csv(OUT/'observation_window.csv',index=False)
     (OUT/'tables.json').write_text(json.dumps(tables,ensure_ascii=False,indent=2))
     summary={'data':'SYNTHETIC ONLY','admissions':len(e),'patients':len(index),'both':int(index.both.sum()),'both_ci':wilson(int(index.both.sum()),len(index)),
              'paired_before_exclusions':int(index.pair7.sum()),'paired_exclusions':len(excluded),'main_pairs':len(main),'categories':main.category.value_counts().to_dict(),

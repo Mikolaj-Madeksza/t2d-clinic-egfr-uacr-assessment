@@ -3,7 +3,7 @@ encounters,encounter_study_id,Admission linkage key; artificial SYNTHETIC identi
 encounters,patient_study_id,Patient linkage and bootstrap cluster key; artificial SYNTHETIC identifier.
 encounters,admission_date,Admission calendar date; study window 2017-01-01 through 2026-09-03.
 encounters,discharge_date,Discharge calendar date; inpatient laboratory date upper bound.
-encounters,clinic,Endocrinology or Diabetology; contemporary medication cohort uses Diabetology.
+encounters,clinic,Endocrinology or Diabetology; medication cohort includes both clinics from 1 January 2023.
 encounters,hospitalization_status,Only discharged admissions are eligible.
 encounters,sex,female or male; CKD-EPI coefficient.
 encounters,age_at_admission_min_years,Released minimum age in years; adult eligibility and sensitivity analysis.
