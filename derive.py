@@ -75,7 +75,7 @@ def laboratory_results(e, labs):
     cr = good[good.analyte.eq('serum_creatinine_mg_dl')].copy()
     cr['egfr'] = egfr(cr.value, cr.age, cr.sex)
     uacr = good[good.analyte.eq('uacr_mg_g')].copy()
-    # v26 has no preferred derived-only UACR; reported and derived alternatives stay separate.
+    # v27 has no preferred derived-only UACR; reported and derived alternatives stay separate.
     assert uacr.result_origin.eq('reported').all()
     assert not labs[labs.analyte.eq('uacr_mg_g') & labs.result_status.eq('parsed') & labs.value.notna()].is_preferred_for_analysis.eq(False).any()
     for field, d in [('creatinine_available', cr), ('uacr_available', uacr)]:

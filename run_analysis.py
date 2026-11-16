@@ -182,7 +182,7 @@ def run():
         ['Reported eGFR','Matched to the selected creatinine by patient, admission and execution timestamp. The laboratory equation and BSA-indexing convention are not specified in the release; this is a sensitivity comparison.'],
     ]
     add('table_s1','Table S1. Analysis definitions',pd.DataFrame(definitions,columns=['Measure','Definition']),
-        'Synthetic demonstration of the v26 analysis rules. Prior adjudicated diabetes classifications were retained; structured E10 code assertions did not automatically override explicit T2D documentation.',
+        'Synthetic demonstration of the v27 analysis rules. Prior adjudicated diabetes classifications were retained; structured E10 code assertions did not automatically override explicit T2D documentation.',
         'ACE, angiotensin-converting enzyme; ARB, angiotensin receptor blocker; BMI, body mass index; BSA, body surface area; CKD-EPI, Chronic Kidney Disease Epidemiology Collaboration; eGFR, estimated glomerular filtration rate; HbA1c, glycated hemoglobin; SGLT2, sodium-glucose cotransporter 2; T2D, type 2 diabetes; UACR, urine albumin-to-creatinine ratio')
 
     rows = []
